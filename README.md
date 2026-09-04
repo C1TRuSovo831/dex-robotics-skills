@@ -23,6 +23,19 @@ Generic debugging uses the `diagnosing-bugs` workflow. New interfaces use `codeb
 Install all four skills:
 
 ```bash
+npx skills add C1TRuSovo831/dex-robotics-skills -g -y
+```
+
+Install only the router:
+
+```bash
+npx skills add C1TRuSovo831/dex-robotics-skills@dex-robotics-engineering -g -y
+```
+
+If automatic discovery does not find all four directories, install them by
+path with the Codex helper script:
+
+```bash
 python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
   --repo C1TRuSovo831/dex-robotics-skills \
   --ref main \
@@ -30,15 +43,6 @@ python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-githu
          dex-ik-design-debug \
          impedance-gain-tuning \
          dex-robotics-engineering
-```
-
-Install only the router:
-
-```bash
-python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
-  --repo C1TRuSovo831/dex-robotics-skills \
-  --ref main \
-  --path dex-robotics-engineering
 ```
 
 ## License
