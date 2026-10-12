@@ -1,22 +1,21 @@
 # dex-robotics-skills
 
-Codex skills for dexterous-hand retargeting, constrained teleoperation IK, impedance kp/kd tuning, and HIL evidence review.
+Codex skills for robotics diagnosis, inverse kinematics, motion retargeting, and control-response tuning across articulated models.
 
 ## Included skills
 
-- `dex-robotics-engineering`: natural-language router with four routes
-- `dex-retargeting-debug`: MANUS/Wuji/Sharpa hand retargeting
-- `dex-ik-design-debug`: FK, Jacobian, DLS, QP/CBF and virtual-wall IK
-- `impedance-gain-tuning`: robot hand and arm kp/kd, PD/PID and impedance tuning
+- `dex-robotics-engineering`: trace the failing layer across sensing, calibration, retargeting, IK, control, and execution
+- `dex-retargeting-debug`: representation and frame contracts, morphology, calibration observability, task objectives, and contact intent
+- `dex-ik-design-debug`: FK/Jacobians, constrained solving, reachability evidence, solution continuity, and virtual fixtures
+- `impedance-gain-tuning`: PD/PID and impedance response with explicit loop, feedback, actuator, and load semantics
 
-## Route priority
+The existing invocation names remain stable. No particular device, vendor, landmark count, joint count, or coordinate convention is assumed.
 
-1. Evidence: HIL, real robot, physical safety, readiness
-2. Retargeting: MANUS, Wuji, 21x3, 20 DOF, pinch, aperture, coordinates
-3. IK: FK, Jacobian, DLS, QP, CBF, singularities, virtual walls
-4. Gain: kp, kd, PD/PID, impedance, overshoot, settling and oscillation
+## Workflow
 
-Generic debugging uses the `diagnosing-bugs` workflow. New interfaces use `codebase-design` first. Regression tests use `tdd` after the public seam is confirmed.
+Use the router when the failing layer is unclear; use a domain skill directly when it is known. Follow the actual source → estimate → task → proposal → command → feedback chain and validate the stage being changed. Runtime behavior, fault responses, clocks, and acceptance criteria come from the project's execution contract.
+
+Shared references cover [execution contracts](dex-robotics-engineering/references/execution-contract.md), [replay validation](dex-robotics-engineering/references/replay-validation.md), and [calibration observability](dex-retargeting-debug/references/calibration-observability.md). Evidence claims stay within the scope established by source inspection, synthetic tests, replay, simulation, or physical measurements.
 
 ## Install
 
@@ -26,11 +25,7 @@ Install all four skills:
 npx skills add C1TRuSovo831/dex-robotics-skills -g -y
 ```
 
-Install only the router:
-
-```bash
-npx skills add C1TRuSovo831/dex-robotics-skills@dex-robotics-engineering -g -y
-```
+Install the four skills together as sibling directories: domain skills link to shared references in `dex-robotics-engineering`.
 
 If automatic discovery does not find all four directories, install them by
 path with the Codex helper script:
@@ -44,6 +39,10 @@ python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-githu
          impedance-gain-tuning \
          dex-robotics-engineering
 ```
+
+## Maintenance and validation
+
+[Behavior cases and evaluation procedure](dex-robotics-engineering/tests/forward-evaluation.md) exercise routing and technical judgment without operating hardware. The [maintenance history](docs/approach-history.md) records the evaluated revision, actual responses, grading, and limitations. Frontmatter, UI metadata, file hashes, and relative links are checked separately; they do not constitute a behavioral evaluation or physical validation.
 
 ## License
 

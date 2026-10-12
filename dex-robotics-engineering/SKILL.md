@@ -1,39 +1,39 @@
 ---
 name: dex-robotics-engineering
-description: Route natural-language engineering requests about dexterous-hand retargeting, teleoperation IK, impedance kp/kd tuning, and HIL or safety evidence into the correct bounded workflow.
+description: Diagnose and route robotics work across sensing and calibration, retargeting, IK, control response, and execution when the failing layer is unclear.
 ---
 
-# Dexterous robotics engineering router
+# Robotics engineering
 
-You do not need to name a skill. Select exactly one primary route from the request and apply the matching domain procedure. Existing generic skills remain lower-level helpers:
+Locate the first stage that violates the requested behavior, then use one primary domain workflow. Device brands, joint counts and words such as “jitter” do not determine that stage. Load another domain only when the evidence requires it.
 
-- `codebase-design` comes before a new module, interface or algorithm architecture;
-- `diagnosing-bugs` is the outer loop for a concrete failure, slowness or regression;
-- `tdd` is used only at a confirmed public seam for a regression test;
-- `visualize` is optional for offline plots and what-if comparisons;
-- `teleop-hil-review` is a separate read-only review for HIL or physical-safety claims.
+## Establish the chain
 
-## Route priority
+Identify the active checkout, dirty state, installed/running code when relevant, model and calibration identity, units, coordinate frames, and the input/solve/command/feedback clocks. Trace the stages that actually exist, for example:
 
-Use this order when multiple signals appear:
+`observation -> state or geometry estimate -> task target -> kinematic proposal -> command shaping -> device command -> measured response`.
 
-1. **Evidence route** — a request to connect a robot, run HIL, prove physical safety or declare real-robot readiness. Do not start hardware or ROS work automatically. If the Planner/Reviewer role or scoped provenance is missing, report the exact evidence gap.
-2. **Retargeting route** — MANUS, Wuji, Sharpa, 21x3, 20 DOF, point order, coordinates, wrist-relative frames, scale, calibration, pinch or aperture. Geometry and representation issues must be resolved before gain tuning.
-3. **IK route** — FK, Jacobian, DLS, damping, seeds, null-space, singularity, QP, CBF, virtual wall, stale async results or trajectory continuity.
-4. **Gain route** — `kp`, `kd`, PD/PID, impedance, stiffness, damping, overshoot, settling, oscillation, step response or saturation.
+The order and ownership come from the current implementation. Align a failing sample across stages by source/session identity and time; find where it first becomes wrong. Source data, estimated state, proposed motion and measured response are distinct evidence.
 
-If a prompt contains only generic “debug”, “broken”, “jitter” or “slow”, use `diagnosing-bugs` and ask which of the three domain routes is load-bearing only when the evidence cannot distinguish them. Do not activate all three domain routes in parallel.
+Before changing an algorithm or architecture, consult the project's approach history and retry conditions. Reuse established results under matching conditions; record a changed assumption or acceptance target when proposing a different route.
 
-## Conflict rules
+## Select the workflow
 
-- Retargeting plus `kp/kd`: make Retargeting primary; defer gains until coordinates, scale, aperture and output continuity are established.
-- IK plus `kp/kd`: make IK primary when the symptom is residual, singularity, constraint violation or stale result; tune gains only after the solver target is trustworthy.
-- New design plus bug report: use `codebase-design` for the seam, then `diagnosing-bugs` and the selected domain route.
-- HIL plus implementation: keep implementation in the normal Coder workflow; use `teleop-hil-review` only for the independent Planner/Reviewer evidence audit.
-- Replay, simulation, static tests and runtime health must be labeled separately; none automatically proves HIL or physical safety.
+| Failure or request | Primary workflow |
+| --- | --- |
+| Input frames, calibration, morphology, source-to-target mapping or task objectives | [Retargeting](../dex-retargeting-debug/SKILL.md); use its calibration reference for sensing/geometry diagnosis |
+| FK/Jacobian, residual formulation, constrained solving, solution branch or virtual fixture | [IK](../dex-ik-design-debug/SKILL.md), even when the solver is inside a retargeter |
+| Tracking dynamics, oscillation, saturation or gains with trustworthy targets | [Impedance and gains](../impedance-gain-tuning/SKILL.md) |
+| Freshness, asynchronous ordering, fault response or command/feedback mismatch | Trace the responsible runtime using [execution contracts](references/execution-contract.md) |
+| Existing logs or a claim of success/readiness | Inspect the scoped evidence; use [replay validation](references/replay-validation.md) for temporal or numerical claims |
+| An authorized device operation | Follow the current project runbook or matching device tool/skill within the authorized scope |
 
-## Shared operating boundary
+For ambiguous mixed symptoms, see [routing examples](references/route-matrix.md). Use `diagnosing-bugs` for a concrete failure and `codebase-design` when an interface decision is needed. Add a regression at the affected public boundary when it can capture the failure. Do not impose an architecture redesign or a complete test suite on every diagnostic task.
 
-Before editing, identify the real checkout, dirty state, install/runtime path, model, SDK, calibration artifact, units and control rate. Preserve existing worktrees and running services. Default to read-only source inspection and offline/replay/fake evaluation; do not connect VUT, ROKAE or MANUS or alter a live robot unless the user gives a concrete, authorized operation and the applicable review gate is satisfied.
+Resolve an upstream target error before tuning downstream gains. If the task requests both analysis and implementation, keep its remaining acceptance criteria open after a partial fix or passing unit test.
 
-Every completion claim must include the exact scope, fresh command or artifact evidence, and the highest evidence class actually established.
+## Scope and evidence
+
+Inspection, replay, visualization, device connection and physical execution are different operations. Follow existing user authorization and applicable project procedures; a mention of hardware or a command in documentation does not authorize motion. A read-only evidence question needs no invented role or approval workflow.
+
+For each material conclusion, state the supporting revision/configuration/session and evidence actually inspected. Software tests, replay, connected hardware, correlated physical response and safeguard validation support different claims; one does not automatically establish the others. Bound a review to its requested acceptance criteria rather than requiring physical evidence for a source-only claim.
